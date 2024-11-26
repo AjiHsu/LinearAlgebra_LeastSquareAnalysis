@@ -52,21 +52,91 @@ public class FunctionSet {
         return result;
     }
 
+    private int[][] inverse(int[][] arr) {
+        // todo
+        return null;
+    }
+
+    private int[] findX(int[][] A, int[] b) { // (A^TA)^-1A^TB
+        // todo
+        return null;
+    }
+
     private static int[] find1DCurve(int[] x, int[] y) {
         // function : y = ax + b
+
+        // A:
+        // x1 1
+        // x2 1
+        // x3 1
+        // .  .
+        // .  .
+
+        // b:
+        // y1
+        // y2
+        // y3
+        // .
+        // .
+
+        // x:
+        // a
+        // b
+
         int len = x.length;
         // todo
         return null;
     }
 
     private static int[] find2DCurve(int[] x, int[] y) {
+        // function : y = ax^2 + bx + c
+
+        // A:
+        // x1^2 x1 1
+        // x2^2 x2 1
+        // x3^2 x3 1
+        // .    .  .
+        // .    .  .
+
+        // b:
+        // y1
+        // y2
+        // y3
+        // .
+        // .
+
+        // x:
+        // a
+        // b
+        // c
+
         // todo
         return null;
     }
 
     private static int[] find2Variable1DCurve(int[] x1, int[] x2, int[] y) {
-        // todo
         // y = ax1 + bx2 + c
+
+        // A:
+        // x11 x12 1
+        // x21 x22 1
+        // x31 x32 1
+        // .   .   .
+        // .   .   .
+
+        // b:
+        // y1
+        // y2
+        // y3
+        // .
+        // .
+
+        // x:
+        // a
+        // b
+        // c
+
+        // todo
         return null;
     }
 
