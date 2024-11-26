@@ -32,16 +32,6 @@ public class FunctionSet {
         return trans;
     }
 
-    private static double[][] transpose(double[] vector) { // 1D transpose
-        double[][] trans = new double[vector.length][1];
-
-        for (int i = 0; i < vector.length; i++) {
-            trans[i][0] = vector[i];
-        }
-
-        return trans;
-    }
-
     private static double[][] multiply(double[][] arr1, double[][] arr2) {
         int m1 = arr1.length;
         int n1 = arr1[0].length;
@@ -66,25 +56,6 @@ public class FunctionSet {
         return result;
     }
 
-    private static double[] minus(double[] a, double[] b) {
-        if (a.length != b.length) {
-            System.err.println("Error: a.length != b.length at function : minus");
-            System.exit(1);
-        }
-        double[] result = new double[a.length];
-        for (int i = 0; i < a.length; i++) {
-            result[i] = a[i] - b[i];
-        }
-        return result;
-    }
-
-    private static boolean isZeroVector(int[] v) {
-        for (int i = 0; i < v.length; i++) {
-            if (v[i] != 0) return false;
-        }
-        return true;
-    }
-
     /* test passed (1) */
     private static boolean isZeroVector(double[] v) {
         for (int i = 0; i < v.length; i++) {
@@ -94,16 +65,16 @@ public class FunctionSet {
     }
 
     /* test passed */
-    private static ArrayList<double[]> GramSchmidtProcess(double[][] A) {
-        int m = A.length; // row number
-        int n = A[0].length; // Rn
+    private static ArrayList<double[]> GramSchmidtProcess(ArrayList<double[]> A) {
+        int m = A.size(); // row number
+        int n = A.get(0).length; // Rn
         int idx = 0;
         ArrayList<double[]> Q = new ArrayList<>();
         double[] v;
         double len;
 
         // first step
-        v = A[idx++]; // error vector (let e1 = v1)
+        v = A.get(idx++); // error vector (let e1 = v1)
         len= 0; // length of vector
         for (double i : v) {
             len += i * i;
@@ -121,7 +92,7 @@ public class FunctionSet {
             if (idx >= m) break;
 
             // find error vector
-            v = A[idx++];
+            v = A.get(idx++);
             for (double[] q : Q) { // vk = sigma(k-1, 1)_qi^T vk qi
                 double t = 0;
                 for (int i = 0; i < q.length; i++) t += q[i] * v[i];
