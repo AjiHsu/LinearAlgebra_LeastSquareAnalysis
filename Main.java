@@ -8,7 +8,7 @@ public class Main {
         return true;
     }
 
-    private static double[][] GramSchmidtProcess(double[][] A) { // one row is one vector
+    private static ArrayList<double[]> GramSchmidtProcess(double[][] A) {
         int m = A.length; // row number
         int n = A[0].length; // Rn
         int idx = 0;
@@ -54,11 +54,7 @@ public class Main {
             }
         }
 
-        double[][] result = new double[Q.size()][];
-        for (int i = 0; i < Q.size(); i++) {
-            result[i] = Q.get(i);
-        }
-        return result;
+        return Q;
     }
 
     public static void main(String[] argv) {
@@ -67,8 +63,8 @@ public class Main {
                 { 1, 0, -2 },
                 { 3, -1, 3 }
         };
-        arr = GramSchmidtProcess(arr);
-        for (double[] i : arr) {
+        ArrayList<double[]> Q = GramSchmidtProcess(arr);
+        for (double[] i : Q) {
             for (double j : i) System.out.print(j + " ");
             System.out.println();
         }

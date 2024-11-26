@@ -3,8 +3,8 @@ import java.util.List;
 
 // limit number of rows cannot exceed 10000
 public class FunctionSet {
-    static final double doubleError = 0.001;
-    static final int limitRun = 10000;
+    public static final double doubleError = 0.001;
+    public static final int limitRun = 10000;
 
     private FunctionSet() { // cannot create an object
     }
@@ -94,7 +94,7 @@ public class FunctionSet {
     }
 
     /* test passed */
-    private static double[][] GramSchmidtProcess(double[][] A) { // one row is one vector
+    private static ArrayList<double[]> GramSchmidtProcess(double[][] A) {
         int m = A.length; // row number
         int n = A[0].length; // Rn
         int idx = 0;
@@ -140,11 +140,7 @@ public class FunctionSet {
             }
         }
 
-        double[][] result = new double[Q.size()][];
-        for (int i = 0; i < Q.size(); i++) {
-            result[i] = Q.get(i);
-        }
-        return result;
+        return Q;
     }
 
     private static int[][] QRFactorization(int[][] A) { // int[0] = Q, int[1] = R
