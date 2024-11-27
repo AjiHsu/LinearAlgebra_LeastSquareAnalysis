@@ -16,6 +16,7 @@
     * $\text{Compute the least square equation:} \quad y = a \cdot x_1 + b \cdot x_2 + c$
     * $e_i = \frac{|y_{\text{given}} - y_{\text{least square}}|}{\sigma}$
     * $\text{Remove the value of index } i \text{ such that } e_i > \text{extremeBound}.$
+    * Find the least square equation again
 
 ### Test Environment
 * The playground is closed now.
