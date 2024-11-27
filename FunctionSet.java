@@ -10,16 +10,11 @@ public class FunctionSet {
     private FunctionSet() { // cannot create an object
     }
 
-    public static List<int[]> run(int[] x1, int[] x2, int[] y) {
-        List<int[]> res = new ArrayList<>();
-        res.add(find2Variable1DCurve(x1, x2, y));
-        res.add(find1DCurve(x1, y));
-        res.add(find2DCurve(x1, y));
-        res.add(find1DCurve(x2, y));
-        res.add(find2DCurve(x2, y));
-        return res;
+    public static double[] run(double[][] A, double[][] y) {
+        return findX(A, y);
     }
 
+    /* test passed (1) */
     private static double[][] transpose(double[][] arr) {
         int m = arr.length;
         int n = arr[0].length;
@@ -33,6 +28,7 @@ public class FunctionSet {
         return trans;
     }
 
+    /* test passed (1) */
     private static double[][] multiply(double[][] arr1, double[][] arr2) {
         int m1 = arr1.length;
         int n1 = arr1[0].length;
@@ -134,7 +130,7 @@ public class FunctionSet {
         double[][] Q = new double[m][k]; // col i = qi
         for (int i = 0; i < k; i++) {
             for (int j = 0; j < m; j++) {
-                Q[i][j] = qs.get(j)[i];
+                Q[j][i] = qs.get(i)[j];
             }
         }
 
@@ -154,89 +150,61 @@ public class FunctionSet {
         return result;
     }
 
-    private static int[] findX(int[][] A, int[] b) { // (A^TA)^-1A^TB or A=QR
-        // todo
-        return null;
+    private static double[] findX(double[][] A, double[][] b) { // b is column vector {{}, {}, {} ...}
+        // x = ((R^T)R)^(-1)(R^T)(Q^T)b --> (R^T)Rx = (R^T)(Q^T)b
+        // let Rx = y, (R^T)(Q^T)b = c
+        // solve R^T y = c : R^T is triangular
+        // solve Rx = y : R is triangular
+        ArrayList<double[][]> QR = QRFactorization(A);
+        double[][] Q = QR.get(0); // m x k
+        double[][] R = QR.get(1); // k x k, A : m x n, n = k
+        int k = QR.get(0)[0].length;
+        int m = A.length;
+        int n = A[0].length;
+        if (n != k) {
+            System.err.println("Error: n != k at function : findX");
+            System.exit(1);
+        }
+        // ----------
+
+        double[][] c = multiply(multiply(transpose(R), transpose(Q)), b); // k x 1, n x 1
+        double[][] y = new double[k][1]; // (R^T_col = i) * y_i  // k x 1, n x 1
+
+        double[][] RT = transpose(R); // lower triangular
+        for (int i = 0; i < k; i++) {
+            double temp = 0;
+            for (int j = 0; j < i; j++) {
+                temp += RT[i][j] * y[j][0];
+            }
+            y[i][0] = (c[i][0] - temp) / RT[i][i];
+        }
+
+        double[][] x = new double[k][1];
+        for (int i = k - 1; i >= 0; i--) {
+            double temp = 0;
+            for (int j = k - 1; j > i; j--) {
+                temp += R[i][j] * x[j][0];
+            }
+            x[i][0] = (y[i][0] - temp) / R[i][i];
+        }
+
+        double[] vx = new double[k];
+        for (int i = 0; i < k; i++) {
+            vx[i] = x[i][0];
+        }
+
+        return vx;
     }
 
-    private static int[] findError(int[][] A, int[] b) { // b - p = b - Ax
-        // todo
-        return null;
-    }
-
-    private static int[] find1DCurve(int[] x, int[] y) {
-        // function : y = ax + b
-
-        // A:
-        // x1 1
-        // x2 1
-        // x3 1
-        // .  .
-        // .  .
-
-        // b:
-        // y1
-        // y2
-        // y3
-        // .
-        // .
-
-        // x:
-        // a
-        // b
-
-        int len = x.length;
-        // todo
-        return null;
-    }
-
-    private static int[] find2DCurve(int[] x, int[] y) {
-        // function : y = ax^2 + bx + c
-
-        // A:
-        // x1^2 x1 1
-        // x2^2 x2 1
-        // x3^2 x3 1
-        // .    .  .
-        // .    .  .
-
-        // b:
-        // y1
-        // y2
-        // y3
-        // .
-        // .
-
-        // x:
-        // a
-        // b
-        // c
-
-        // todo
-        return null;
-    }
-
-    private static int[] find2Variable1DCurve(int[] x1, int[] x2, int[] y) {
+    private static int[] find2Variable1D1DCurve(double[] x1, double[] x2, double[] y, int dim1, int dim2) {
         // y = ax1 + bx2 + c
 
-        // A:
-        // x11 x12 1
-        // x21 x22 1
-        // x31 x32 1
-        // .   .   .
-        // .   .   .
-
-        // b:
-        // y1
-        // y2
-        // y3
-        // .
-        // .
-
-        // x:
-        // a
-        // b
-        // c
+        // A:           b:  x:
+        // x11 x12 1    y1  a
+        // x21 x22 1    y2  b
+        // x31 x32 1    y3  c
+        // .   .   .    .   .
+        // .   .   .    .   .
 
         // todo
         return null;
