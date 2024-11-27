@@ -151,10 +151,8 @@ public class FunctionSet {
     }
 
     private static double[] findX(double[][] A, double[][] b) { // b is column vector {{}, {}, {} ...}
-        // x = ((R^T)R)^(-1)(R^T)(Q^T)b --> (R^T)Rx = (R^T)(Q^T)b
-        // let Rx = y, (R^T)(Q^T)b = c
-        // solve R^T y = c : R^T is triangular
-        // solve Rx = y : R is triangular
+        // x = ((R^T)R)^(-1)(R^T)(Q^T)b --> (R^T)Rx = (Q^T)b
+        // let Rx = c, (Q^T)b = c -> solve x
         ArrayList<double[][]> QR = QRFactorization(A);
         double[][] Q = QR.get(0); // m x k
         double[][] R = QR.get(1); // k x k, A : m x n, n = k
@@ -167,25 +165,15 @@ public class FunctionSet {
         }
         // ----------
 
-        double[][] c = multiply(multiply(transpose(R), transpose(Q)), b); // k x 1, n x 1
-        double[][] y = new double[k][1]; // (R^T_col = i) * y_i  // k x 1, n x 1
+        double[][] c = multiply(transpose(Q), b); // k x 1, n x 1
+        double[][] x = new double[k][1]; // (R^T_col = i) * x_i  // k x 1, n x 1
 
-        double[][] RT = transpose(R); // lower triangular
-        for (int i = 0; i < k; i++) {
-            double temp = 0;
-            for (int j = 0; j < i; j++) {
-                temp += RT[i][j] * y[j][0];
-            }
-            y[i][0] = (c[i][0] - temp) / RT[i][i];
-        }
-
-        double[][] x = new double[k][1];
         for (int i = k - 1; i >= 0; i--) {
             double temp = 0;
             for (int j = k - 1; j > i; j--) {
                 temp += R[i][j] * x[j][0];
             }
-            x[i][0] = (y[i][0] - temp) / R[i][i];
+            x[i][0] = (c[i][0] - temp) / R[i][i];
         }
 
         double[] vx = new double[k];
