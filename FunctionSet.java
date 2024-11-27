@@ -4,12 +4,19 @@ import java.util.Arrays;
 // limit number of rows cannot exceed 10000
 public class FunctionSet {
     public static final double doubleError = 0.001;
+    public static final double extremeBound = 2d;
 
     private FunctionSet() { // cannot create an object
     }
 
     public static double[] run(double[] x1, double[] x2, double[] y) {
-        return find2VariableCurve(x1, x2, y);
+        double[] equation = find2VariableCurve(x1, x2, y);
+        ArrayList<Integer> extremes = findExtreme(x1, x2, y, equation);
+        x1 = removeExtreme(x1, extremes);
+        x2 = removeExtreme(x2, extremes);
+        y = removeExtreme(y, extremes);
+        equation = find2VariableCurve(x1, x2, y);
+        return equation;
     }
 
     private static double[][] transpose(double[][] arr) {
@@ -211,5 +218,48 @@ public class FunctionSet {
         for (int i = 0; i < y.length; i++) b[i][0] = y[i];
 
         return findX(A, b);
+    }
+
+    // ---------- eliminateExtreme : return a set of index that is to be removed
+    private static ArrayList<Integer> findExtreme(double[] x1, double[] x2, double[] y, double[] equation) { // equation { a, b, c } where y = ax1 + bx2 + c
+        double[] e = new double[x1.length];
+
+        for (int i = 0; i < x1.length; i++) {
+            e[i] = Math.abs((equation[0] * x1[i] + equation[1] * x2[i] + equation[2]) - y[i]);
+        }
+
+        // find sigma
+        double sigma = 0;
+        double average = 0;
+        for (int i = 0; i < e.length; i++) average += e[i];
+        average /= e.length;
+        for (int i = 0; i < e.length; i++) sigma += (e[i] - average) * (e[i] - average);
+        sigma /= e.length;
+        sigma = Math.sqrt(sigma);
+        if (sigma < doubleError) return new ArrayList<>();
+
+        // find extreme
+        for (int i = 0; i < e.length; i++) e[i] /= sigma;
+
+        ArrayList<Integer> extremes = new ArrayList<>();
+        for (int i = 0; i < e.length; i++) {
+            if (e[i] > extremeBound) extremes.add(i);
+        }
+
+        return extremes;
+    }
+
+    private static double[] removeExtreme(double[] x, ArrayList<Integer> extremes) {
+        double[] result = new double[x.length - extremes.size()];
+        int k = 0;
+        int t = 0;
+        for (int i = 0; i < x.length; i++) {
+            if (t < extremes.size() && i == extremes.get(t)) {
+                t++;
+            } else {
+                result[k++] = x[i];
+            }
+        }
+        return result;
     }
 }
