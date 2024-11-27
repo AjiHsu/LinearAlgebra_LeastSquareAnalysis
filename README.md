@@ -3,7 +3,7 @@
 ---
 * static functionSet cannot create any object due to the private Constructer
 * the only method visible by Main is `double[] run(double[] x1, double[] x2, double[] y)`, which is public and can be called from outside.
-* the return is value `x = { a, b, c };` where `y = ax1 + bx2 + c`
+* the return value is `x = { a, b, c };` where `y = ax1 + bx2 + c`
 
 ### Test Environment
 * The playground is open to the public and can be edited by anyone, so if you want to test the code, I will open the playground for you to test. [LINK](https://leetcode.com/playground/krTvtUT2)
