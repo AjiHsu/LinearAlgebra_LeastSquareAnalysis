@@ -3,12 +3,13 @@ import java.util.Arrays;
 
 // test environment
 public class Main {
-    // through
+    // test
     public static void main(String[] argv) {
-        double[][] A = {{1, 1, 1}, {2, 3, 4}, {4, 9, 16}, {5, 25, 125}};
-        double[][] b = {{6}, {14}, {50}, {205}};
+        double[] x1 = { 1, 3, 4, 5, 24, 203, 23920 };
+        double[] x2 = { 24, 245, 2513, 3333, 9045, 10293, 105000 };
+        double[] y = { 90, 209, 329, 4444, 5789, 7890, 9013 };
 
-        double[] x = FunctionSet.run(A, b);
+        double[] x = FunctionSet.run(x1, x2, y);
 
         for (int i = 0; i < x.length; i++) {
             System.out.print(x[i] + " ");

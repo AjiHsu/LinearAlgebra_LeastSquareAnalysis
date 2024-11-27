@@ -1,20 +1,17 @@
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 // limit number of rows cannot exceed 10000
 public class FunctionSet {
     public static final double doubleError = 0.001;
-    public static final int limitRun = 10000;
 
     private FunctionSet() { // cannot create an object
     }
 
-    public static double[] run(double[][] A, double[][] y) {
-        return findX(A, y);
+    public static double[] run(double[] x1, double[] x2, double[] y) {
+        return find2VariableCurve(x1, x2, y);
     }
 
-    /* test passed (1) */
     private static double[][] transpose(double[][] arr) {
         int m = arr.length;
         int n = arr[0].length;
@@ -28,7 +25,6 @@ public class FunctionSet {
         return trans;
     }
 
-    /* test passed (1) */
     private static double[][] multiply(double[][] arr1, double[][] arr2) {
         int m1 = arr1.length;
         int n1 = arr1[0].length;
@@ -53,7 +49,6 @@ public class FunctionSet {
         return result;
     }
 
-    /* test passed (1) */
     private static boolean isZeroVector(double[] v) {
         for (int i = 0; i < v.length; i++) {
             if (v[i] > doubleError) return false;
@@ -61,7 +56,6 @@ public class FunctionSet {
         return true;
     }
 
-    /* test passed */
     private static ArrayList<double[]> GramSchmidtProcess(ArrayList<double[]> A) {
         int m = A.size(); // row number
         int n = A.get(0).length; // Rn
@@ -111,7 +105,6 @@ public class FunctionSet {
         return Q;
     }
 
-    /* test passed */
     private static ArrayList<double[][]> QRFactorization(double[][] A) { // get(0) = Q; get(1) = R
         ArrayList<double[]> as = new ArrayList<>(); // column vectors of A : v
         for (int i = 0; i < A[0].length; i++) {
@@ -196,7 +189,7 @@ public class FunctionSet {
         return vx;
     }
 
-    private static int[] find2Variable1D1DCurve(double[] x1, double[] x2, double[] y, int dim1, int dim2) {
+    private static double[] find2VariableCurve(double[] x1, double[] x2, double[] y) {
         // y = ax1 + bx2 + c
 
         // A:           b:  x:
@@ -206,8 +199,17 @@ public class FunctionSet {
         // .   .   .    .   .
         // .   .   .    .   .
 
-        // todo
-        return null;
-    }
+        double[][] A = new double[x1.length][3];
+        for (int i = 0; i < x1.length; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (j == 2) A[i][j] = 1;
+                else if (j == 1) A[i][j] = x2[i];
+                else A[i][j] = x1[i];
+            }
+        }
+        double[][] b = new double[y.length][1];
+        for (int i = 0; i < y.length; i++) b[i][0] = y[i];
 
+        return findX(A, b);
+    }
 }
