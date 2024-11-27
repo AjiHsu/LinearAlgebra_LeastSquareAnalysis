@@ -6,6 +6,7 @@
 * the return value is `x = { a, b, c };` where `y = ax1 + bx2 + c`
 
 ### Test Environment
+* The playground is closed now.
 * The playground is open to the public and can be edited by anyone, so if you want to test the code, I will open the playground for you to test. [LINK](https://leetcode.com/playground/krTvtUT2)
 * All you can edit is the array x1, x2, y, and they MUST have the same length.
 ![image](https://github.com/user-attachments/assets/d417ccc8-9faf-4279-ae2e-3aec721c03ad)
