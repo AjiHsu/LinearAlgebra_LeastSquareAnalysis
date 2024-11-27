@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 // limit number of rows cannot exceed 10000
@@ -74,7 +75,7 @@ public class FunctionSet {
         double len;
 
         // first step
-        v = A.get(idx++); // error vector (let e1 = v1)
+        v = Arrays.copyOf(A.get(idx++), n); // error vector (let e1 = v1)
         len= 0; // length of vector
         for (double i : v) {
             len += i * i;
@@ -92,7 +93,7 @@ public class FunctionSet {
             if (idx >= m) break;
 
             // find error vector
-            v = A.get(idx++);
+            v = Arrays.copyOf(A.get(idx++), n);
             for (double[] q : Q) { // vk = sigma(k-1, 1)_qi^T vk qi
                 double t = 0;
                 for (int i = 0; i < q.length; i++) t += q[i] * v[i];
@@ -114,9 +115,43 @@ public class FunctionSet {
         return Q;
     }
 
-    private static int[][] QRFactorization(int[][] A) { // int[0] = Q, int[1] = R
-        // todo
-        return null;
+    /* test passed */
+    private static ArrayList<double[][]> QRFactorization(double[][] A) { // get(0) = Q; get(1) = R
+        ArrayList<double[]> as = new ArrayList<>(); // column vectors of A : v
+        for (int i = 0; i < A[0].length; i++) {
+            double[] t = new double[A.length];
+            for (int j = 0; j < A.length; j++) {
+                t[j] = A[j][i];
+            }
+            as.add(t);
+        }
+
+        ArrayList<double[]> qs = GramSchmidtProcess(as); // orthonormal column vectors : q
+        int m = qs.get(0).length; // dim of column vectors
+        int k = qs.size(); // number of orthonormal vectors
+
+        // Q
+        double[][] Q = new double[m][k]; // col i = qi
+        for (int i = 0; i < k; i++) {
+            for (int j = 0; j < m; j++) {
+                Q[i][j] = qs.get(j)[i];
+            }
+        }
+
+        // R
+        double[][] R = new double[k][k]; // Rij = qTi * vj
+        for (int i = 0; i < k; i++) {
+            for (int j = i; j < k; j++) {
+                for (int t = 0; t < m; t++) {
+                    R[i][j] += as.get(j)[t] * qs.get(i)[t];
+                }
+            }
+        }
+
+        ArrayList<double[][]> result = new ArrayList<>();
+        result.add(Q);
+        result.add(R);
+        return result;
     }
 
     private static int[] findX(int[][] A, int[] b) { // (A^TA)^-1A^TB or A=QR
