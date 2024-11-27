@@ -28,19 +28,26 @@ const main = () => {
     console.log(result);
 };
 
+// test environment
+
 class FunctionSet {
     static doubleError = 0.001;
+    static extremeBound = 2;
 
     static run(x1, x2, y) {
-        return this.find2VariableCurve(x1, x2, y);
+        let equation = this.find2VariableCurve(x1, x2, y);
+        let extremes = this.findExtreme(x1, x2, y, equation);
+        x1 = this.removeExtreme(x1, extremes);
+        x2 = this.removeExtreme(x2, extremes);
+        y = this.removeExtreme(y, extremes);
+        equation = this.find2VariableCurve(x1, x2, y);
+        return equation;
     }
 
-    // Transpose the matrix
     static transpose(arr) {
         const m = arr.length;
         const n = arr[0].length;
-        const trans = Array(n).fill().map(() => Array(m));
-
+        const trans = Array.from({ length: n }, () => Array(m));
         for (let i = 0; i < m; i++) {
             for (let j = 0; j < n; j++) {
                 trans[j][i] = arr[i][j];
@@ -49,7 +56,6 @@ class FunctionSet {
         return trans;
     }
 
-    // Matrix multiplication
     static multiply(arr1, arr2) {
         const m1 = arr1.length;
         const n1 = arr1[0].length;
@@ -61,7 +67,7 @@ class FunctionSet {
             return null;
         }
 
-        const result = Array(m1).fill().map(() => Array(n2).fill(0));
+        const result = Array.from({ length: m1 }, () => Array(n2).fill(0));
 
         for (let i = 0; i < m1; i++) {
             for (let j = 0; j < n2; j++) {
@@ -74,59 +80,53 @@ class FunctionSet {
         return result;
     }
 
-    // Check if vector is a zero vector
     static isZeroVector(v) {
-        return v.every(val => val <= this.doubleError);
+        for (let i = 0; i < v.length; i++) {
+            if (v[i] > this.doubleError) return false;
+        }
+        return true;
     }
 
-    // Gram-Schmidt Process to orthonormalize vectors
     static GramSchmidtProcess(A) {
-        const m = A.length; // Row number
-        const n = A[0].length; // Rn
+        const m = A.length;
+        const n = A[0].length;
         let idx = 0;
         const Q = [];
-
         let v;
         let len;
 
-        // First step
-        v = [...A[idx++]]; // Error vector (let e1 = v1)
+        // first step
+        v = [...A[idx++]]; // error vector (let e1 = v1)
         len = 0;
         for (let i of v) {
             len += i * i;
         }
-
         len = Math.sqrt(len);
-        for (let i = 0; i < n; i++) { // Normalization
+        for (let i = 0; i < n; i++) { // normalization
             v[i] /= len;
         }
 
-        // Step iteration
+        // step iteration
         while (!this.isZeroVector(v)) {
-            Q.push(v); // Add to Q
+            Q.push(v);
 
             if (idx >= m) break;
 
-            // Find error vector
+            // find error vector
             v = [...A[idx++]];
-            for (let q of Q) { // v_k = v_k - sigma(k-1, 1)_qi^T * v_k * qi
+            for (let q of Q) { // vk = sigma(k-1, 1)_qi^T vk qi
                 let t = 0;
-                for (let i = 0; i < q.length; i++) {
-                    t += q[i] * v[i];
-                }
-                for (let i = 0; i < v.length; i++) {
-                    v[i] -= t * q[i];
-                }
+                for (let i = 0; i < q.length; i++) t += q[i] * v[i];
+                for (let i = 0; i < v.length; i++) v[i] -= t * q[i];
             }
 
-            // Normalization
+            // normalization
             len = 0;
             for (let i of v) {
                 len += i * i;
             }
-
             len = Math.sqrt(len);
-            for (let i = 0; i < n; i++) { // Normalization
+            for (let i = 0; i < n; i++) { // normalization
                 v[i] /= len;
             }
         }
@@ -134,24 +134,22 @@ class FunctionSet {
         return Q;
     }
 
-    // QR Factorization
     static QRFactorization(A) {
         const as = [];
         for (let i = 0; i < A[0].length; i++) {
-            const t = Array(A.length).fill(0);
+            const t = Array.from({ length: A.length });
             for (let j = 0; j < A.length; j++) {
                 t[j] = A[j][i];
             }
             as.push(t);
         }
 
-        const qs = this.GramSchmidtProcess(as); // Orthonormal column vectors
-
-        const m = qs[0].length; // Dim of column vectors
-        const k = qs.length; // Number of orthonormal vectors
+        const qs = this.GramSchmidtProcess(as);
+        const m = qs[0].length;
+        const k = qs.length;
 
         // Q
-        const Q = Array(m).fill().map(() => Array(k).fill(0));
+        const Q = Array.from({ length: m }, () => Array(k));
         for (let i = 0; i < k; i++) {
             for (let j = 0; j < m; j++) {
                 Q[j][i] = qs[i][j];
@@ -159,7 +157,7 @@ class FunctionSet {
         }
 
         // R
-        const R = Array(k).fill().map(() => Array(k).fill(0));
+        const R = Array.from({ length: k }, () => Array(k).fill(0));
         for (let i = 0; i < k; i++) {
             for (let j = i; j < k; j++) {
                 for (let t = 0; t < m; t++) {
@@ -171,15 +169,21 @@ class FunctionSet {
         return [Q, R];
     }
 
-    // Solve the system of linear equations for x
     static findX(A, b) {
         const QR = this.QRFactorization(A);
-        const Q = QR[0]; // m x k
-        const R = QR[1]; // k x k
+        const Q = QR[0];
+        const R = QR[1];
         const k = QR[0][0].length;
+        const m = A.length;
+        const n = A[0].length;
 
-        const c = this.multiply(this.multiply(this.transpose(R), this.transpose(Q)), b); // k x 1
-        const y = Array(k).fill().map(() => [0]);
+        if (n !== k) {
+            console.error("Error: n != k at function : findX");
+            return null;
+        }
+
+        const c = this.multiply(this.multiply(this.transpose(R), this.transpose(Q)), b);
+        const y = Array.from({ length: k }, () => [0]);
 
         const RT = this.transpose(R);
         for (let i = 0; i < k; i++) {
@@ -190,7 +194,7 @@ class FunctionSet {
             y[i][0] = (c[i][0] - temp) / RT[i][i];
         }
 
-        const x = Array(k).fill().map(() => [0]);
+        const x = Array.from({ length: k }, () => [0]);
         for (let i = k - 1; i >= 0; i--) {
             let temp = 0;
             for (let j = k - 1; j > i; j--) {
@@ -202,16 +206,38 @@ class FunctionSet {
         return x.map(val => val[0]);
     }
 
-    // Find coefficients for a 2-variable linear equation
     static find2VariableCurve(x1, x2, y) {
         const A = x1.map((_, i) => [x1[i], x2[i], 1]);
         const b = y.map(val => [val]);
 
         return this.findX(A, b);
     }
+
+    static findExtreme(x1, x2, y, equation) {
+        const e = x1.map((_, i) => Math.abs((equation[0] * x1[i] + equation[1] * x2[i] + equation[2]) - y[i]));
+        let sigma = 0;
+        let average = e.reduce((acc, val) => acc + val, 0) / e.length;
+
+        sigma = e.reduce((acc, val) => acc + (val - average) * (val - average), 0) / e.length;
+        sigma = Math.sqrt(sigma);
+
+        if (sigma < this.doubleError) return [];
+
+        for (let i = 0; i < e.length; i++) e[i] /= sigma;
+
+        const extremes = [];
+        for (let i = 0; i < e.length; i++) {
+            if (e[i] > this.extremeBound) extremes.push(i);
+        }
+
+        return extremes;
+    }
+
+    static removeExtreme(x, extremes) {
+        return x.filter((_, index) => !extremes.includes(index));
+    }
 }
 
 // Call the main function to execute
 main();
-
 ```
