@@ -1,9 +1,10 @@
 ## Least Square Method
 #### by AJI Hsu 2024/11/26 ~ 2024/11/27
 ---
-* static functionSet cannot create any object due to the private Constructer
-* the only method visible by Main is `double[] run(double[] x1, double[] x2, double[] y)`, which is public and can be called from outside.
-* the return value is `x = { a, b, c };` where `y = ax1 + bx2 + c`
+* FunctionSet cannot create any object due to the private Constructer
+* All method is static
+* The only method visible by Main is `double[] run(double[] x1, double[] x2, double[] y)`, which is public and can be called from outside.
+* The return value is `x = { a, b, c };` where `y = ax1 + bx2 + c`
 
 ### Test Environment
 * The playground is closed now.
