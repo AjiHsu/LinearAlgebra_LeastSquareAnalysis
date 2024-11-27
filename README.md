@@ -6,6 +6,17 @@
 * The only method visible by Main is `double[] run(double[] x1, double[] x2, double[] y)`, which is public and can be called from outside.
 * The return value is `x = { a, b, c };` where `y = ax1 + bx2 + c`
 
+### Core Linear Algebra Method
+* Use A = QR to avoid computing Gussian Elimination
+    * $\text{Solve } x = \left( (R^T)R \right)^{-1} (R^T)(Q^T)b \quad \text{which becomes} \quad (R^T)Rx = (R^T)(Q^T)b$
+    * $\text{Let } Rx = y, \quad (R^T)(Q^T)b = c$
+    * $\text{Solve } R^T y = c \quad \text{where} \quad R^T \text{ is lower triangular}$
+    * $\text{Solve } Rx = y \quad \text{where} \quad R \text{ is upper triangular}$
+* Find and remove the extreme values :
+    * $\text{Compute the least square equation:} \quad y = a \cdot x_1 + b \cdot x_2 + c$
+    * $e_i = \frac{|y_{\text{given}} - y_{\text{least square}}|}{\sigma}$
+    * $\text{Remove the value of index } i \text{ such that } e_i > \text{extremeBound}.$
+
 ### Test Environment
 * The playground is closed now.
 * The playground is open to the public and can be edited by anyone, so if you want to test the code, I will open the playground for you to test. [LINK](https://leetcode.com/playground/krTvtUT2)
