@@ -11,7 +11,7 @@
 ![image](https://github.com/user-attachments/assets/d417ccc8-9faf-4279-ae2e-3aec721c03ad)
 
 ### JS version:
-```javascript=
+```js
 // Test environment
 const main = () => {
     // Test values for x1, x2, and y
