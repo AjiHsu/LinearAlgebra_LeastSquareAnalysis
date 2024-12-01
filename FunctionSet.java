@@ -58,7 +58,7 @@ public class FunctionSet {
 
     private static boolean isZeroVector(double[] v) {
         for (int i = 0; i < v.length; i++) {
-            if (v[i] > doubleError) return false;
+            if (Math.abs(v[i]) > doubleError) return false;
         }
         return true;
     }
