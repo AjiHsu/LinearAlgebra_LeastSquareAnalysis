@@ -8,10 +8,7 @@
 
 ### Core Linear Algebra Method
 * Use A = QR to avoid computing Gussian Elimination
-    * $\text{Solve } x = \left( (R^T)R \right)^{-1} (R^T)(Q^T)b \quad \text{which becomes} \quad (R^T)Rx = (R^T)(Q^T)b$
-    * $\text{Let } Rx = y, \quad (R^T)(Q^T)b = c$
-    * $\text{Solve } R^T y = c \quad \text{where} \quad R^T \text{ is lower triangular}$
-    * $\text{Solve } Rx = y \quad \text{where} \quad R \text{ is upper triangular}$
+    * $\text{Solve } x = \left( (R^T)R \right)^{-1} (R^T)(Q^T)b \quad \text{which becomes} \quad Rx = (Q^T)b$
 * Find and remove the extreme values :
     * $\text{Compute the least square equation:} \quad y = a \cdot x_1 + b \cdot x_2 + c$
     * $e_i = \frac{|y_{\text{given}} - y_{\text{least square}}|}{\sigma}$
