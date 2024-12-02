@@ -23,7 +23,6 @@
 
 ### JS version:
 ```js
-// Test environment
 const main = () => {
     // Test values for x1, x2, and y
     const x1 = [1, 3, 4, 5, 24, 203, 23920];
@@ -37,15 +36,18 @@ const main = () => {
     console.log(result);
 };
 
-// test environment
-
 class FunctionSet {
     static doubleError = 0.001;
-    static extremeBound = 2;
+    static extremeBound = 2.0;
+
+    constructor() {
+        // cannot create an object
+        throw new Error("This class cannot be instantiated.");
+    }
 
     static run(x1, x2, y) {
         let equation = this.find2VariableCurve(x1, x2, y);
-        let extremes = this.findExtreme(x1, x2, y, equation);
+        const extremes = this.findExtreme(x1, x2, y, equation);
         x1 = this.removeExtreme(x1, extremes);
         x2 = this.removeExtreme(x2, extremes);
         y = this.removeExtreme(y, extremes);
@@ -56,7 +58,8 @@ class FunctionSet {
     static transpose(arr) {
         const m = arr.length;
         const n = arr[0].length;
-        const trans = Array.from({ length: n }, () => Array(m));
+        const trans = Array.from({ length: n }, () => Array(m).fill(0));
+
         for (let i = 0; i < m; i++) {
             for (let j = 0; j < n; j++) {
                 trans[j][i] = arr[i][j];
@@ -90,15 +93,12 @@ class FunctionSet {
     }
 
     static isZeroVector(v) {
-        for (let i = 0; i < v.length; i++) {
-            if (v[i] > this.doubleError) return false;
-        }
-        return true;
+        return v.every(value => Math.abs(value) <= this.doubleError);
     }
 
     static GramSchmidtProcess(A) {
-        const m = A.length;
-        const n = A[0].length;
+        const m = A.length; // row number
+        const n = A[0].length; // Rn
         let idx = 0;
         const Q = [];
         let v;
@@ -106,144 +106,100 @@ class FunctionSet {
 
         // first step
         v = [...A[idx++]]; // error vector (let e1 = v1)
-        len = 0;
-        for (let i of v) {
-            len += i * i;
-        }
-        len = Math.sqrt(len);
-        for (let i = 0; i < n; i++) { // normalization
-            v[i] /= len;
-        }
+        len = Math.sqrt(v.reduce((sum, i) => sum + i * i, 0));
+
+        v = v.map(i => i / len); // normalization
 
         // step iteration
         while (!this.isZeroVector(v)) {
-            Q.push(v);
+            Q.push(v); // add to Q
 
             if (idx >= m) break;
 
             // find error vector
             v = [...A[idx++]];
-            for (let q of Q) { // vk = sigma(k-1, 1)_qi^T vk qi
-                let t = 0;
-                for (let i = 0; i < q.length; i++) t += q[i] * v[i];
-                for (let i = 0; i < v.length; i++) v[i] -= t * q[i];
+            for (const q of Q) {
+                const t = q.reduce((sum, qi, i) => sum + qi * v[i], 0);
+                for (let i = 0; i < v.length; i++) {
+                    v[i] -= t * q[i];
+                }
             }
 
             // normalization
-            len = 0;
-            for (let i of v) {
-                len += i * i;
-            }
-            len = Math.sqrt(len);
-            for (let i = 0; i < n; i++) { // normalization
-                v[i] /= len;
-            }
+            len = Math.sqrt(v.reduce((sum, i) => sum + i * i, 0));
+            v = v.map(i => i / len);
         }
 
         return Q;
     }
 
-    static QRFactorization(A) {
-        const as = [];
-        for (let i = 0; i < A[0].length; i++) {
-            const t = Array.from({ length: A.length });
-            for (let j = 0; j < A.length; j++) {
-                t[j] = A[j][i];
-            }
-            as.push(t);
-        }
+    static QRFactorization(A) { // get(0) = Q; get(1) = R
+        const as = Array.from({ length: A[0].length }, (_, i) => A.map(row => row[i]));
 
-        const qs = this.GramSchmidtProcess(as);
-        const m = qs[0].length;
-        const k = qs.length;
+        const qs = this.GramSchmidtProcess(as); // orthonormal column vectors : q
+        const m = qs[0].length; // dim of column vectors
+        const k = qs.length; // number of orthonormal vectors
 
         // Q
-        const Q = Array.from({ length: m }, () => Array(k));
-        for (let i = 0; i < k; i++) {
-            for (let j = 0; j < m; j++) {
-                Q[j][i] = qs[i][j];
-            }
-        }
+        const Q = Array.from({ length: m }, (_, j) => qs.map(q => q[j]));
 
         // R
         const R = Array.from({ length: k }, () => Array(k).fill(0));
         for (let i = 0; i < k; i++) {
             for (let j = i; j < k; j++) {
-                for (let t = 0; t < m; t++) {
-                    R[i][j] += as[j][t] * qs[i][t];
-                }
+                R[i][j] = qs[i].reduce((sum, qi, t) => sum + qi * as[j][t], 0);
             }
         }
 
         return [Q, R];
     }
 
-    static findX(A, b) {
-        const QR = this.QRFactorization(A);
-        const Q = QR[0];
-        const R = QR[1];
-        const k = QR[0][0].length;
-        const m = A.length;
-        const n = A[0].length;
+    static findX(A, b) { // b is column vector {{}, {}, {} ...}
+        const [Q, R] = this.QRFactorization(A);
+        const c = this.multiply(this.transpose(Q), b);
 
-        if (n !== k) {
-            console.error("Error: n != k at function : findX");
-            return null;
-        }
-
-        const c = this.multiply(this.multiply(this.transpose(R), this.transpose(Q)), b);
-        const y = Array.from({ length: k }, () => [0]);
-
-        const RT = this.transpose(R);
-        for (let i = 0; i < k; i++) {
+        const x = Array(R.length).fill(0);
+        for (let i = R.length - 1; i >= 0; i--) {
             let temp = 0;
-            for (let j = 0; j < i; j++) {
-                temp += RT[i][j] * y[j][0];
+            for (let j = R.length - 1; j > i; j--) {
+                temp += R[i][j] * x[j];
             }
-            y[i][0] = (c[i][0] - temp) / RT[i][i];
+            x[i] = (c[i][0] - temp) / R[i][i];
         }
 
-        const x = Array.from({ length: k }, () => [0]);
-        for (let i = k - 1; i >= 0; i--) {
-            let temp = 0;
-            for (let j = k - 1; j > i; j--) {
-                temp += R[i][j] * x[j][0];
-            }
-            x[i][0] = (y[i][0] - temp) / R[i][i];
-        }
-
-        return x.map(val => val[0]);
+        return x;
     }
 
     static find2VariableCurve(x1, x2, y) {
-        const A = x1.map((_, i) => [x1[i], x2[i], 1]);
+        // y = ax1 + bx2 + c
+        const A = x1.map((val, i) => [x1[i], x2[i], 1]);
         const b = y.map(val => [val]);
 
         return this.findX(A, b);
     }
 
-    static findExtreme(x1, x2, y, equation) {
-        const e = x1.map((_, i) => Math.abs((equation[0] * x1[i] + equation[1] * x2[i] + equation[2]) - y[i]));
-        let sigma = 0;
-        let average = e.reduce((acc, val) => acc + val, 0) / e.length;
+    static findExtreme(x1, x2, y, equation) { // equation { a, b, c } where y = ax1 + bx2 + c
+        const e = x1.map((_, i) =>
+            Math.abs((equation[0] * x1[i] + equation[1] * x2[i] + equation[2]) - y[i])
+        );
 
-        sigma = e.reduce((acc, val) => acc + (val - average) * (val - average), 0) / e.length;
-        sigma = Math.sqrt(sigma);
-
+        // find sigma
+        const average = e.reduce((sum, val) => sum + val, 0) / e.length;
+        let sigma = Math.sqrt(
+            e.reduce((sum, val) => sum + (val - average) ** 2, 0) / e.length
+        );
         if (sigma < this.doubleError) return [];
 
-        for (let i = 0; i < e.length; i++) e[i] /= sigma;
+        // find extreme
+        const normalizedE = e.map(val => val / sigma);
 
-        const extremes = [];
-        for (let i = 0; i < e.length; i++) {
-            if (e[i] > this.extremeBound) extremes.push(i);
-        }
-
-        return extremes;
+        return normalizedE
+            .map((val, i) => (val > this.extremeBound ? i : -1))
+            .filter(index => index !== -1);
     }
 
-    static removeExtreme(x, extremes) {
-        return x.filter((_, index) => !extremes.includes(index));
+    static removeExtreme(arr, extremes) {
+        return arr.filter((_, i) => !extremes.includes(i));
     }
 }
 
